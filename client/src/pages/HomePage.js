@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../components/layout/Layout";
 import { Modal, Form, Input, Select, message, Table, DatePicker } from "antd";
-import { UnorderedListOutlined, AreaChartOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  UnorderedListOutlined,
+  AreaChartOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import Spinner from "../components/layout/Spinner";
 import axios from "axios";
 import moment from "moment";
@@ -50,16 +55,27 @@ const HomePage = () => {
     {
       title: "Actions",
       render: (text, record) => (
-        <div>
-            <EditOutlined  onClick={() =>{
+        <div
+          style={{ display: "flex", gap: 12, fontSize: 18, cursor: "pointer" }}
+        >
+          <EditOutlined
+            title="Edit Transaction"
+            onClick={() => {
               setEditable(record);
               setShowModal(true);
-            }}/>
-            <DeleteOutlined className="mx-2" onClick={() =>{
+            }}
+            style={{ color: "#2563eb" }}
+          />
+          <DeleteOutlined
+            title="Delete Transaction"
+            style={{ color: "#ef4444" }}
+            onClick={() => {
               handleDelete(record);
-            }} />
+            }}
+          />
         </div>
-    )},
+      ),
+    },
   ];
 
   // Fetch transactions
@@ -86,48 +102,46 @@ const HomePage = () => {
     // eslint-disable-next-line
   }, [frequency, selectedDate, type]);
 
-  const handleDelete= async(record) =>{
-     try{
+  const handleDelete = async (record) => {
+    try {
       setLoading(true);
-      await axios.post("/transactions/delete-transaction", 
-        {transactionId: record._id}     
-    )
-    setLoading(false);
+      await axios.post("/transactions/delete-transaction", {
+        transactionId: record._id,
+      });
+      setLoading(false);
       message.success("Transaction deleted successfully");
-  }catch(error){
+      getAllTransactions();
+    } catch (error) {
       setLoading(false);
       message.error("Failed to delete transaction");
-     }
-  }
+    }
+  };
 
   // Form handling
   const handleSubmit = async (values) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
-      if(editable) {
+      if (editable) {
         await axios.post("/transactions/edit-transaction", {
           payload: {
             ...values,
-            userId: user._id
-          }
-          , transactionId: editable._id
+            userId: user._id,
+          },
+          transactionId: editable._id,
         });
-        setLoading(false);
         message.success("Transaction updated Successfully");
-      }else{
-        // Add new transaction
+      } else {
         await axios.post("/transactions/add-transaction", {
           ...values,
           userId: user._id,
         });
-      
+        message.success("Transaction added Successfully");
       }
       setLoading(false);
-      message.success("Transaction added Successfully");
       setShowModal(false);
-      setEditable(null); // Reset editable state
-      getAllTransactions(); // Refresh table after adding
+      setEditable(null);
+      getAllTransactions();
     } catch (error) {
       setLoading(false);
       message.error("Something went wrong");
@@ -137,24 +151,27 @@ const HomePage = () => {
   return (
     <Layout>
       {loading && <Spinner />}
-      <div
-        className="filters"
-        style={{
-          display: "flex",
-          gap: 24,
-          alignItems: "center",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          marginBottom: 24,
-          background: "gray"
-        }}
-      >
-        <div>
-          <h6>Select Time Frame</h6>
+      {/* Stylish Filters Bar */}
+      <div className="filters-bar">
+        <div className="filter-item">
+          <span
+            className="filter-label"
+            style={{
+              background: "linear-gradient(90deg, #a855f7 60%, #7c3aed 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              color: "transparent",
+            }}
+          >
+            Time Frame
+          </span>
           <Select
             value={frequency}
             onChange={setFrequency}
-            style={{ width: 150 }}
+            style={{ width: 152 }}
+            size="large"
+            dropdownStyle={{ fontSize: "1rem" }}
           >
             <Select.Option value="7">Last 1 week</Select.Option>
             <Select.Option value="30">Last 1 month</Select.Option>
@@ -165,71 +182,111 @@ const HomePage = () => {
             <RangePicker
               value={selectedDate}
               onChange={setSelectedDate}
-              style={{ marginTop: 8 }}
+              style={{ marginTop: 8, width: "100%" }}
+              size="large"
             />
           )}
         </div>
-        <div>
-          <h6>Select Type</h6>
-          <Select value={type} onChange={setType} style={{ width: 150 }}>
+        <div className="filter-item">
+          <span
+            className="filter-label"
+            style={{
+              background: "linear-gradient(90deg, #a855f7 60%, #7c3aed 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              color: "transparent",
+            }}
+          >
+            Type
+          </span>
+          <Select
+            value={type}
+            onChange={setType}
+            style={{ width: 152 }}
+            size="large"
+          >
             <Select.Option value="all">All</Select.Option>
             <Select.Option value="income">Income</Select.Option>
             <Select.Option value="expense">Expense</Select.Option>
           </Select>
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            border: "1px solid  rgba(0,0,0,0.677)",
-            padding: "10px 20px",
-            borderRadius: "10px",
-          }}
-        >
-          <UnorderedListOutlined
-            className={`mx-2 ${
-              viewData === "table" ? "active-icon" : "inactive-icon"
+        <div className="filter-icons-bar">
+          <div
+            className={`filter-icon-btn ${
+              viewData === "table" ? "active" : ""
             }`}
-            style={{ fontSize: 24, cursor: "pointer" }}
+            title="Show Table"
             onClick={() => setViewData("table")}
-          />
-          <AreaChartOutlined  className={`mx-2 ${
-              viewData === 'analytics' ? 'active-icon' : 'inactive-icon'
+          >
+            <UnorderedListOutlined />
+            <div className="icon-label">Table</div>
+          </div>
+          <div
+            className={`filter-icon-btn ${
+              viewData === "analytics" ? "active" : ""
             }`}
+            title="Show Analytics"
             onClick={() => setViewData("analytics")}
-            />
+          >
+            <AreaChartOutlined />
+            <div className="icon-label">Analytics</div>
+          </div>
           <button
-            className="btn btn-primary"
+            className="add-transaction-btn"
+            title="Add Transaction"
             onClick={() => {
               setShowModal(true);
+              setEditable(null);
             }}
           >
-            Add New
+            <span className="plus-circle">+</span>
+            <span className="add-label">Add Transaction</span>
           </button>
         </div>
       </div>
+
+      {/* Main Content: Table or Analytics */}
       <div className="content" style={{ marginTop: 24 }}>
-        {viewData === 'table' ? (
+        {viewData === "table" ? (
           <Table columns={columns} dataSource={alltransactions} rowKey="_id" />
         ) : (
           <Analytics alltransactions={alltransactions} />
         )}
       </div>
+
+      {/* Modal for Add/Edit Transaction */}
       <Modal
         title={editable ? "Edit Transaction" : "Add Transaction"}
         open={showModal}
-        onCancel={() => setShowModal(false)}
+        onCancel={() => {
+          setShowModal(false);
+          setEditable(null);
+        }}
         footer={false}
+        destroyOnClose={true}
       >
-        <Form className="form" layout="vertical" onFinish={handleSubmit} initialValues={editable}>
+        <Form
+          className="form"
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={
+            editable
+              ? {
+                  ...editable,
+                  date: moment(editable.date).format("YYYY-MM-DD"),
+                }
+              : {}
+          }
+        >
           <Form.Item
             label="Amount"
             name="amount"
             rules={[{ required: true, message: "Amount is required" }]}
           >
-            <Input type="number" />
+            <Input type="number" min={0} step="0.01" />
           </Form.Item>
+
           <Form.Item
             label="Type"
             name="type"
@@ -240,6 +297,7 @@ const HomePage = () => {
               <Select.Option value="expense">Expense</Select.Option>
             </Select>
           </Form.Item>
+
           <Form.Item
             label="Category"
             name="category"
@@ -258,6 +316,7 @@ const HomePage = () => {
               <Select.Option value="other">Other</Select.Option>
             </Select>
           </Form.Item>
+
           <Form.Item
             label="Date"
             name="date"
@@ -265,9 +324,11 @@ const HomePage = () => {
           >
             <Input type="date" />
           </Form.Item>
+
           <Form.Item label="Description" name="description">
             <Input type="text" />
           </Form.Item>
+
           <Form.Item
             label="Transaction Type"
             name="transactionType"
@@ -280,7 +341,8 @@ const HomePage = () => {
               <Select.Option value="debit">Debit</Select.Option>
             </Select>
           </Form.Item>
-          <div className="d-flex justify-content-end">
+
+          <div style={{ textAlign: "right" }}>
             <button className="btn btn-primary" type="submit">
               Submit
             </button>

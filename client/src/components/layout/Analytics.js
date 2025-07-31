@@ -1,123 +1,152 @@
 import React from "react";
 import { Progress } from "antd";
+import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 
 const Analytics = ({ alltransactions = [] }) => {
   const categories = [
     "salary", "food", "transport", "entertainment", "bills",
     "shopping", "health", "education", "utilities", "other"
   ];
-
   const incomeCategories = ["salary", "other"];
   const expenseCategories = categories.filter(
-    cat => cat !== "salary" && cat !== "other"
+    cat => !incomeCategories.includes(cat)
   );
 
   const totalTransactions = alltransactions.length;
 
   const totalIncome = alltransactions.filter(
-    transaction =>
-      transaction.type && transaction.type.toLowerCase() === "income"
+    t => t.type && t.type.toLowerCase() === "income"
   );
-
   const totalExpense = alltransactions.filter(
-    transaction =>
-      transaction.type && transaction.type.toLowerCase() === "expense"
+    t => t.type && t.type.toLowerCase() === "expense"
   );
 
   const totalTurnover = alltransactions.reduce(
-    (acc, transaction) => acc + transaction.amount,
-    0
+    (acc, t) => acc + Number(t.amount), 0
   );
   const totalIncomeTurnover = totalIncome.reduce(
-    (acc, transaction) => acc + transaction.amount,
-    0
+    (acc, t) => acc + Number(t.amount), 0
   );
   const totalExpenseTurnover = totalExpense.reduce(
-    (acc, transaction) => acc + transaction.amount,
-    0
+    (acc, t) => acc + Number(t.amount), 0
   );
+  const balance = totalIncomeTurnover - totalExpenseTurnover;
 
-  const totalIncomePercentage = ((totalIncome.length / totalTransactions) * 100) || 0;
-  const totalExpensePercentage = ((totalExpense.length / totalTransactions) * 100) || 0;
-  const totalIncomeTurnoverPercentage = totalTurnover
-    ? (totalIncomeTurnover / totalTurnover) * 100
-    : 0;
-  const totalExpenseTurnoverPercentage = totalTurnover
-    ? (totalExpenseTurnover / totalTurnover) * 100
-    : 0;
+  // Percentages
+  const totalIncomePerc = (totalIncome.length / totalTransactions) * 100 || 0;
+  const totalExpensePerc = (totalExpense.length / totalTransactions) * 100 || 0;
+  const incomeTurnoverPerc = totalTurnover ? (totalIncomeTurnover / totalTurnover) * 100 : 0;
+  const expenseTurnoverPerc = totalTurnover ? (totalExpenseTurnover / totalTurnover) * 100 : 0;
 
   return (
+   <div className="dashboard-background">
+  {/* Header */}
+  <div className="dashboard-header">
     <div>
-      {/* Main Analytics Cards */}
-      <div className="analytics-row">
-        {/* Transaction Count Analytics */}
-        <div className="analytics-col">
-          <div className="analytics-card">
-            <div className="analytics-card-header">Total Transactions: {totalTransactions}</div>
-            <div className="analytics-card-body">
-              <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
-                <div className="text-center">
-                  <Progress
-                    type="circle"
-                    percent={Number(totalIncomePercentage.toFixed(0))}
-                    strokeColor="green"
-                    format={percent => `${percent}%`}
-                    width={80}
-                  />
-                  <div className="mt-2 text-success">Income</div>
-                </div>
-                <div className="text-center">
-                  <Progress
-                    type="circle"
-                    percent={Number(totalExpensePercentage.toFixed(0))}
-                    strokeColor="red"
-                    format={percent => `${percent}%`}
-                    width={80}
-                  />
-                  <div className="mt-2 text-danger">Expense</div>
-                </div>
-              </div>
-              <h5 className="text-success">Income: {totalIncome.length}</h5>
-              <h5 className="text-danger">Expense: {totalExpense.length}</h5>
-            </div>
-          </div>
+      <h2 className="text-primary" style={{
+        fontWeight: "700", 
+        fontSize: "2rem",
+        background: "linear-gradient(90deg, #a855f7 60%, #7c3aed 100%)",
+        backgroundClip: "text",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        color: "transparent"
+      }}>Hello Tushar</h2>
         </div>
+        {/* Avatar (optional) */}
+      </div>
 
-        {/* Turnover Analytics */}
+      {/* Balance Card */}
+      <div className="analytics-row" style={{marginBottom: "20px"}}>
         <div className="analytics-col">
-          <div className="analytics-card">
-            <div className="analytics-card-header">Total Turnover: ₹{totalTurnover}</div>
-            <div className="analytics-card-body">
-              <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
-                <div className="text-center">
-                  <Progress
-                    type="circle"
-                    percent={Number(totalIncomeTurnoverPercentage.toFixed(0))}
-                    strokeColor="green"
-                    format={percent => `${percent}%`}
-                    width={80}
-                  />
-                  <div className="mt-2 text-success">Income</div>
-                </div>
-                <div className="text-center">
-                  <Progress
-                    type="circle"
-                    percent={Number(totalExpenseTurnoverPercentage.toFixed(0))}
-                    strokeColor="red"
-                    format={percent => `${percent}%`}
-                    width={80}
-                  />
-                  <div className="mt-2 text-danger">Expense</div>
-                </div>
-              </div>
-              <h5 className="text-success">Income: ₹{totalIncomeTurnover}</h5>
-              <h5 className="text-danger">Expense: ₹{totalExpenseTurnover}</h5>
+          <div className="analytics-balance-card">
+            <div style={{fontWeight: 500}}>Total Balance U Earned and Spent</div>
+            <div style={{display:'flex',alignItems:'center',marginTop:"10px"}}>
+              <span style={{
+                fontSize:"2.1rem",
+                fontWeight:600
+              }}>₹ {balance}</span>
+            </div>
+            <div style={{fontSize:"1rem", marginTop:"6px"}}>
+              <span className="text-success"><ArrowUpOutlined /> Income: ₹{totalIncomeTurnover}</span> &nbsp;&nbsp;
+              <span className="text-danger"><ArrowDownOutlined /> Expense: ₹{totalExpenseTurnover}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Categorywise Income and Expense side by side */}
+      {/* Analytics Summary Cards */}
+      <div className="analytics-row">
+        {/* Transaction Count Card */}
+        <div className="analytics-col">
+          <div className="analytics-card">
+            <div className="analytics-card-header">Total Transactions</div>
+            <div className="analytics-card-accent">{totalTransactions}</div>
+            <div style={{ display: "flex", gap: 36, justifyContent: 'center'}}>
+              <div className="text-center">
+                <Progress
+                  type="circle"
+                  percent={Number(totalIncomePerc.toFixed(0))}
+                  strokeColor="#22c55e"
+                  format={percent => `${percent}%`}
+                  width={70}
+                />
+                <div className="mt-2 text-success">Income</div>
+              </div>
+              <div className="text-center">
+                <Progress
+                  type="circle"
+                  percent={Number(totalExpensePerc.toFixed(0))}
+                  strokeColor="#ef4444"
+                  format={percent => `${percent}%`}
+                  width={70}
+                />
+                <div className="mt-2 text-danger">Expense</div>
+              </div>
+            </div>
+            <div style={{display: "flex", justifyContent: "space-between", marginTop: 16}}>
+              <span className="text-success">Income: {totalIncome.length}</span>
+              <span className="text-danger">Expense: {totalExpense.length}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Turnover Card */}
+        <div className="analytics-col">
+          <div className="analytics-card">
+            <div className="analytics-card-header">Total Turnover</div>
+            <div className="analytics-card-accent">₹{totalTurnover}</div>
+            <div style={{ display: "flex", gap: 36, justifyContent: 'center'}}>
+              <div className="text-center">
+                <Progress
+                  type="circle"
+                  percent={Number(incomeTurnoverPerc.toFixed(0))}
+                  strokeColor="#22c55e"
+                  format={percent => `${percent}%`}
+                  width={70}
+                />
+                <div className="mt-2 text-success">Income</div>
+              </div>
+              <div className="text-center">
+                <Progress
+                  type="circle"
+                  percent={Number(expenseTurnoverPerc.toFixed(0))}
+                  strokeColor="#ef4444"
+                  format={percent => `${percent}%`}
+                  width={70}
+                />
+                <div className="mt-2 text-danger">Expense</div>
+              </div>
+            </div>
+            <div style={{display:"flex", justifyContent:"space-between",marginTop:16}}>
+              <span className="text-success">₹{totalIncomeTurnover}</span>
+              <span className="text-danger">₹{totalExpenseTurnover}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Categorywise Income & Expense */}
       <div className="analytics-row">
         {/* Categorywise Income */}
         <div className="analytics-col">
@@ -131,7 +160,7 @@ const Analytics = ({ alltransactions = [] }) => {
                   t.type &&
                   t.type.toLowerCase() === "income"
               )
-              .reduce((acc, curr) => acc + curr.amount, 0);
+              .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
             const percent = totalIncomeTurnover
               ? ((incomeAmount / totalIncomeTurnover) * 100).toFixed(0)
@@ -140,13 +169,14 @@ const Analytics = ({ alltransactions = [] }) => {
             return (
               <div className="analytics-card" key={category + "-income"}>
                 <div className="analytics-category-title">
-                  <span>{category}</span>
-                  <span>{percent}%</span>
+                  <span style={{ textTransform: "capitalize" }}>{category}</span>
+                  <span>{percent}% (₹{incomeAmount})</span>
                 </div>
                 <Progress
                   percent={Number(percent)}
                   strokeColor="#52c41a"
                   format={() => ""}
+                  showInfo={false}
                 />
               </div>
             );
@@ -165,7 +195,7 @@ const Analytics = ({ alltransactions = [] }) => {
                   t.type &&
                   t.type.toLowerCase() === "expense"
               )
-              .reduce((acc, curr) => acc + curr.amount, 0);
+              .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
             const percent = totalExpenseTurnover
               ? ((expenseAmount / totalExpenseTurnover) * 100).toFixed(0)
@@ -174,13 +204,14 @@ const Analytics = ({ alltransactions = [] }) => {
             return (
               <div className="analytics-card" key={category + "-expense"}>
                 <div className="analytics-category-title">
-                  <span>{category}</span>
-                  <span>{percent}%</span>
+                  <span style={{ textTransform: "capitalize" }}>{category}</span>
+                  <span>{percent}% (₹{expenseAmount})</span>
                 </div>
                 <Progress
                   percent={Number(percent)}
-                  strokeColor="#f5222d"
+                  strokeColor="#ef4444"
                   format={() => ""}
+                  showInfo={false}
                 />
               </div>
             );
